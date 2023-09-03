@@ -129,7 +129,7 @@ def submit(request, course_id):
             submitted_answers.append(choice_id)
 
     
-    for choice_id in submitted_answers:
+    for choices in submitted_answers:
         choice_obj = Choice.objects.get(id=choice_id)
         submission.choices.add(choice_obj)
     submission.save()  
@@ -163,17 +163,17 @@ def extract_answers(request):
         # Get the selected choice ids from the submission record
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
-def show_exam_result(request, course_id, submission_id):
-    course_obj = Course.objects.get(id=course_id)
+def show_exam_result(request, lesson_id, submission_id):
+    lesson_obj = lesson_id
 
     context = {}
-    context['course'] = course_obj
+    context['lesson'] = lesson_obj
 
     submission_choices = Submission.objects.get(id=submission_id).choices.all()
     context['choices'] = submission_choices
     print("Submission choices: \n", submission_choices)
 
-    all_exam_questions = Question.objects.filter(courses=course_id)
+    all_exam_questions = Question.objects.filter(lesson = lesson_id)
     context['questions'] = all_exam_questions
     print("All exam questions: \n", all_exam_questions)
 
@@ -184,9 +184,9 @@ def show_exam_result(request, course_id, submission_id):
     submission_score = 0
     max_score = 0
     for question in all_exam_questions:
-        max_score += question.marks
-        if question.answered_correctly(submission_choices):
-            submission_score += question.marks
+        max_score += question.grade
+        if question.is_get_score(submission_choices):
+            submission_score += question.grade
         
     
     context['grade'] = round(submission_score / max_score * 100)
